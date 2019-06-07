@@ -102,7 +102,7 @@ def scheduler_job():
     # 采用固定时间间隔（interval）的方式，每隔1秒钟执行一次
     scheduler.add_job(peformance_monitor, 'interval', seconds=1)
     # 24小时定时清除数据
-    scheduler.add_job(peformance_monitor, 'interval', hours=24)
+    scheduler.add_job(peformance_monitor, 'interval', hours=1)
     scheduler.start()
 
 
