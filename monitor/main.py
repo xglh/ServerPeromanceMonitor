@@ -41,11 +41,11 @@ def peformance_monitor():
         mMemUsage.total = mem_usage_data.total
         mMemUsage.used = mem_usage_data.used
         mMemUsage.free = mem_usage_data.free
+        mMemUsage.time_stamp = getTime()
         if mem_type == 'mem':
             mMemUsage.shared = mem_usage_data.shared
             mMemUsage.buff_cache = mem_usage_data.buffers
             mMemUsage.available = mem_usage_data.available
-            mMemUsage.time_stamp = getTime()
         session.add(mMemUsage)
 
     disk_usage_data_dict = get_disk_useage_data()
