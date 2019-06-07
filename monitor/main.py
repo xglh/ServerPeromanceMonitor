@@ -9,6 +9,7 @@ from sqlalchemy.orm import sessionmaker
 from monitor.model import Base, engine, CpuUsage, MemUsage, DiskUsage, NetUsage
 from monitor.util import *
 from apscheduler.schedulers.blocking import BlockingScheduler
+from multiprocessing import Process
 
 Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
@@ -89,8 +90,21 @@ def peformance_monitor():
     session.commit()
 
 
-if __name__ == '__main__':
+def clear_expire_data():
+    session.query(CpuUsage).delete()
+    session.query(MemUsage).delete()
+    session.query(DiskUsage).delete()
+    session.query(NetUsage).delete()
+
+
+def scheduler_job():
     scheduler = BlockingScheduler()
-    # 采用固定时间间隔（interval）的方式，每隔5秒钟执行一次
+    # 采用固定时间间隔（interval）的方式，每隔1秒钟执行一次
     scheduler.add_job(peformance_monitor, 'interval', seconds=1)
+    # 24小时定时清除数据
+    scheduler.add_job(peformance_monitor, 'interval', hours=24)
     scheduler.start()
+
+
+if __name__ == '__main__':
+    Process(target=scheduler_job, args=()).start()

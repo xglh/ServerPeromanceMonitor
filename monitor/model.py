@@ -140,22 +140,22 @@ class NetUsage(Base,JsonSerializer):
         return "NetUsage:iface:{},bytes_sent:{},bytes_recv:{}".format(self.iface, self.bytes_sent, self.bytes_recv)
 
 
-# if __name__ == '__main__':
-#     Base.metadata.create_all(engine)
-#
-#     # 创建User类实例
-#     memUsage = MemUsage(type='mem', total=1000, used=20, free=20, shared=30, buff_cache=40, available=50,
-#                         time_stamp=11111111111)
-#     Session = sessionmaker(bind=engine)
-#     # 创建Session类实例
-#     session = Session()
-#     # 将该实例插入到users表
-#     session.add(memUsage)
-#
-#     # # 一次插入多条记录形式
-#     # session.add_all(
-#     #     [User(name='wendy', fullname='Wendy Williams', password='foobar'),
-#     #      User(name='mary', fullname='Mary Contrary', password='xxg527'),
-#     #      User(name='fred', fullname='Fred Flinstone', password='blah')]
-#     # )
-#     session.commit()
+if __name__ == '__main__':
+    Base.metadata.create_all(engine)
+    # 创建User类实例
+    memUsage = MemUsage(type='mem', total=1000, used=20, free=20, shared=30, buff_cache=40, available=50,
+                        time_stamp=11111111111)
+    Session = sessionmaker(bind=engine)
+    # 创建Session类实例
+    session = Session()
+    # 将该实例插入到users表
+    session.add(memUsage)
+    session.query(NetUsage).delete()
+
+    # # 一次插入多条记录形式
+    # session.add_all(
+    #     [User(name='wendy', fullname='Wendy Williams', password='foobar'),
+    #      User(name='mary', fullname='Mary Contrary', password='xxg527'),
+    #      User(name='fred', fullname='Fred Flinstone', password='blah')]
+    # )
+    session.commit()
