@@ -51,7 +51,7 @@ def get_disk_useage_data():
     device_list = []
     for disk_info in disk_partitions():
         device_path = disk_info.device
-        device = device_path.split('/')
+        device = device_path.split('/')[-1]
         device_list.append(device)
     for device in disk_usage_data_dict:
         if device in device_list:
