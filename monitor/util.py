@@ -64,9 +64,5 @@ def get_net_useage_data():
     for iface in net_usage_data_dict:
         if iface in iface_info_dict:
             addr = iface_info_dict.get(iface)
-            result[iface] = {
-                'addr': addr,
-                'data': net_usage_data_dict.get(iface)
-            }
+            result[iface] = net_usage_data_dict.get(iface)
     return result
-
