@@ -48,9 +48,12 @@ def get_disk_useage_data():
     # 按设备区分
     disk_usage_data_dict = disk_io_counters(perdisk=True)
     # 获取磁盘盘符
-    device_list = [x.device for x in disk_partitions()]
-    for device_path in disk_usage_data_dict:
-        device = device_path.split('/')[-1]
+    device_list = []
+    for disk_info in disk_partitions():
+        device_path = disk_info.device
+        device = device_path.split('/')
+        device_list.append(device)
+    for device in disk_usage_data_dict:
         if device in device_list:
             result[device] = disk_usage_data_dict.get(device)
     return result
