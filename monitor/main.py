@@ -32,7 +32,7 @@ def peformance_monitor():
     mCpuUsage.hard_irq = cpu_usage_data.irq
     mCpuUsage.soft_irq = cpu_usage_data.softirq
     mCpuUsage.steal = cpu_usage_data.steal
-
+    mCpuUsage.time_stamp = getTime()
     session.add(mCpuUsage)
     session.commit()
 
