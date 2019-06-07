@@ -1,8 +1,9 @@
-import os
+import sys,os
 
 current_path = os.path.abspath(__file__)
 current_dir = os.path.abspath(os.path.dirname(current_path) + os.path.sep + ".")
 project_dir = '{}/../'.format(current_dir)
+sys.path.append(project_dir)
 
 from sqlalchemy.orm import sessionmaker
 from monitor.model import Base, engine, CpuUsage, MemUsage, DiskUsage, NetUsage
