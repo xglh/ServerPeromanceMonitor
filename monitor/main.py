@@ -19,7 +19,7 @@ session = Session()
 
 def peformance_monitor():
     cpu_usage_data = get_cpu_useage_data()
-    # print(cpu_usage_data)
+    print(cpu_usage_data)
     mCpuUsage = CpuUsage()
     mCpuUsage.user = cpu_usage_data.user
     mCpuUsage.nice = cpu_usage_data.nice
@@ -33,7 +33,7 @@ def peformance_monitor():
     session.add(mCpuUsage)
 
     mem_usage_data_dict = get_mem_useage_data()
-    # print(mem_usage_data_dict)
+    print(mem_usage_data_dict)
     for mem_type in mem_usage_data_dict:
         mem_usage_data = mem_usage_data_dict.get(mem_type)
         mMemUsage = MemUsage()
@@ -50,7 +50,7 @@ def peformance_monitor():
         session.add(mMemUsage)
 
     disk_usage_data_dict = get_disk_useage_data()
-    # print(disk_usage_data_dict)
+    print(disk_usage_data_dict)
     for device in disk_usage_data_dict:
         disk_usage_data = disk_usage_data_dict.get(device)
 
@@ -71,7 +71,7 @@ def peformance_monitor():
         session.add(mDiskUsage)
 
     net_usage_data_dict = get_net_useage_data()
-    # print(net_usage_data_dict)
+    print(net_usage_data_dict)
     for iface in net_usage_data_dict:
         net_usage_data = net_usage_data_dict.get(iface)
         mNetUsage = NetUsage()
