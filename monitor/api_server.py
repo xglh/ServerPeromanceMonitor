@@ -13,11 +13,23 @@ from multiprocessing import Process
 from flask import Flask, request
 
 app = Flask(__name__)
-base_url = "https://te2.kaiheikeji.com"
 Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
 # 创建Session类实例
 session = Session()
+
+
+# 清除过期数据,避免存储过多数据
+def clear_expire_data():
+    # 过期秒数
+    expire_second = 60 * 60
+    current_time_stamp = getTime()
+    # 过期时间戳
+    expire_time_stamp = current_time_stamp - expire_second
+    session.query(CpuUsage).filter(CpuUsage.time_stamp >= expire_time_stamp).delete()
+    session.query(MemUsage).filter(CpuUsage.time_stamp >= expire_time_stamp).delete()
+    session.query(DiskUsage).filter(CpuUsage.time_stamp >= expire_time_stamp).delete()
+    session.query(NetUsage).filter(CpuUsage.time_stamp >= expire_time_stamp).delete()
 
 
 def peformance_monitor():
@@ -90,31 +102,39 @@ def peformance_monitor():
         mNetUsage.time_stamp = getTime()
 
         session.add(mNetUsage)
+    # 清除过期数据
+    clear_expire_data()
     session.commit()
 
 
-# 清除过期数据
-def clear_expire_data():
-    session.query(CpuUsage).delete()
-    session.query(MemUsage).delete()
-    session.query(DiskUsage).delete()
-    session.query(NetUsage).delete()
-
-
-# 定时任务
 def scheduler_job():
     scheduler = BlockingScheduler()
     # 采用固定时间间隔（interval）的方式，每隔1秒钟执行一次
     scheduler.add_job(peformance_monitor, 'interval', seconds=1)
-    # 1小时定时清除数据
-    scheduler.add_job(peformance_monitor, 'interval', hours=1)
     scheduler.start()
 
 
-# APP调用-暴鸡币支付
+def summary_list_data(target_list):
+    data_min = data_max = data_avg = 0
+    if len(target_list) > 0:
+        data_min, data_max = min(target_list), max(target_list)
+        data_sum = 0
+        for data in target_list:
+            data_sum += data
+
+        data_avg = float('%.2f' % (data_sum / len(target_list)))
+
+    return {
+        'Avg': data_avg,
+        'Max': data_max,
+        'Min': data_min
+    }
+
+
+# 获取性能数据
 @app.route('/server/performance', methods=['GET'])
 def get_server_performance_data():
-    response = {"code": 0, "msg": "成功", "data": []}
+    response = {"code": 0, "msg": "success", "data": {}}
     data = response['data']
     start_timestamp, end_timestamp = request.args.get("start_timestamp"), request.args.get("end_timestamp")
     if not start_timestamp or not end_timestamp:
@@ -127,13 +147,33 @@ def get_server_performance_data():
         else:
             mCpuUsage_qs = session.query(CpuUsage).filter(CpuUsage.time_stamp >= start_timestamp,
                                                           CpuUsage.time_stamp <= end_timestamp).all()
-            for mCpuUsage in mCpuUsage_qs:
-                cpu_usage_json = mCpuUsage.to_json()
-                del cpu_usage_json['id']
-                data.append(cpu_usage_json)
+            # 空闲数据列表
+            cpu_idle_data_list = [x.idle for x in mCpuUsage_qs]
+            # cpu占用数据
+            cpu_usage_data_list = []
+            for idle in cpu_idle_data_list:
+                cpu_usage = 100 - idle
+                cpu_usage_data_list.append(cpu_usage)
+
+            # 生成cpu占用数据汇总
+            data['CpuUsage'] = summary_list_data(cpu_usage_data_list)
+
+            # 计算物理内存占用,忽略swap分区
+            mMemUsage_qs = session.query(MemUsage).filter(MemUsage.time_stamp >= start_timestamp,
+                                                          MemUsage.time_stamp <= end_timestamp,
+                                                          MemUsage.type == 'mem').all()
+            # mem占用数据
+            mem_usage_data_list = []
+            for mMemUsage in mMemUsage_qs:
+                total, available = mMemUsage.total, mMemUsage.available
+                available_percent = float('%.4f' % (available / total))
+                usage = 100 - available_percent * 100
+                mem_usage_data_list.append(usage)
+            # 生成cpu占用数据汇总
+            data['MemUsage'] = summary_list_data(mem_usage_data_list)
     return json.dumps(response), 200, {'Content-Type': 'application/json;charset=utf-8'}
 
 
 if __name__ == '__main__':
-    # Process(target=scheduler_job, args=()).start()
-    app.run(host='0.0.0.0', port=8000)
+    Process(target=scheduler_job, args=()).start()
+    app.run(host='0.0.0.0', port=8080)
