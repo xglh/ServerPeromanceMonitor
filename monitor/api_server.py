@@ -95,15 +95,18 @@ def peformance_monitor():
         mNetUsage.time_stamp = getTime()
 
         p_session.add(mNetUsage)
-
+    p_session.commit()
     # 过期秒数
     expire_second = 60 * 60
     current_time_stamp = getTime()
     # 过期时间戳
     expire_time_stamp = current_time_stamp - expire_second
     p_session.query(CpuUsage).filter(CpuUsage.time_stamp >= expire_time_stamp).delete(synchronize_session=False)
+    p_session.commit()
     p_session.query(MemUsage).filter(CpuUsage.time_stamp >= expire_time_stamp).delete(synchronize_session=False)
+    p_session.commit()
     p_session.query(DiskUsage).filter(CpuUsage.time_stamp >= expire_time_stamp).delete(synchronize_session=False)
+    p_session.commit()
     p_session.query(NetUsage).filter(CpuUsage.time_stamp >= expire_time_stamp).delete(synchronize_session=False)
     p_session.commit()
 
