@@ -31,9 +31,13 @@ def clear_expire_data():
     session.query(MemUsage).filter(CpuUsage.time_stamp >= expire_time_stamp).delete()
     session.query(DiskUsage).filter(CpuUsage.time_stamp >= expire_time_stamp).delete()
     session.query(NetUsage).filter(CpuUsage.time_stamp >= expire_time_stamp).delete()
+    session.commit()
 
 
 def peformance_monitor():
+    # 清除过期数据
+    clear_expire_data()
+
     cpu_usage_data = get_cpu_useage_data()
     print(cpu_usage_data)
     mCpuUsage = CpuUsage()
@@ -103,8 +107,6 @@ def peformance_monitor():
         mNetUsage.time_stamp = getTime()
 
         session.add(mNetUsage)
-    # 清除过期数据
-    clear_expire_data()
     session.commit()
 
 
