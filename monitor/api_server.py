@@ -24,7 +24,7 @@ session = Session()
 def peformance_monitor():
     # 多进程session不能贡献
     # 创建Session类实例
-    session = Session()
+    p_session = Session()
 
     cpu_usage_data = get_cpu_useage_data()
     print(cpu_usage_data)
@@ -38,7 +38,7 @@ def peformance_monitor():
     mCpuUsage.soft_irq = cpu_usage_data.softirq
     mCpuUsage.steal = cpu_usage_data.steal
     mCpuUsage.time_stamp = getTime()
-    session.add(mCpuUsage)
+    p_session.add(mCpuUsage)
 
     mem_usage_data_dict = get_mem_useage_data()
     print(mem_usage_data_dict)
@@ -55,7 +55,7 @@ def peformance_monitor():
             mMemUsage.shared = mem_usage_data.shared
             mMemUsage.buff_cache = mem_usage_data.buffers
             mMemUsage.available = mem_usage_data.available
-        session.add(mMemUsage)
+        p_session.add(mMemUsage)
 
     disk_usage_data_dict = get_disk_useage_data()
     print(disk_usage_data_dict)
@@ -76,7 +76,7 @@ def peformance_monitor():
         mDiskUsage.write_bytes = disk_usage_data.read_merged_count
         mDiskUsage.busy_time = disk_usage_data.read_merged_count
         mDiskUsage.time_stamp = getTime()
-        session.add(mDiskUsage)
+        p_session.add(mDiskUsage)
 
     net_usage_data_dict = get_net_useage_data()
     print(net_usage_data_dict)
@@ -94,18 +94,18 @@ def peformance_monitor():
         mNetUsage.dropout = net_usage_data.dropout
         mNetUsage.time_stamp = getTime()
 
-        session.add(mNetUsage)
+        p_session.add(mNetUsage)
 
     # 过期秒数
     expire_second = 60 * 60
     current_time_stamp = getTime()
     # 过期时间戳
     expire_time_stamp = current_time_stamp - expire_second
-    session.query(CpuUsage).filter(CpuUsage.time_stamp >= expire_time_stamp).delete()
-    session.query(MemUsage).filter(CpuUsage.time_stamp >= expire_time_stamp).delete()
-    session.query(DiskUsage).filter(CpuUsage.time_stamp >= expire_time_stamp).delete()
-    session.query(NetUsage).filter(CpuUsage.time_stamp >= expire_time_stamp).delete()
-    session.commit()
+    p_session.query(CpuUsage).filter(CpuUsage.time_stamp >= expire_time_stamp).delete()
+    p_session.query(MemUsage).filter(CpuUsage.time_stamp >= expire_time_stamp).delete()
+    p_session.query(DiskUsage).filter(CpuUsage.time_stamp >= expire_time_stamp).delete()
+    p_session.query(NetUsage).filter(CpuUsage.time_stamp >= expire_time_stamp).delete()
+    p_session.commit()
 
 
 def scheduler_job():
