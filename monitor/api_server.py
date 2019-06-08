@@ -22,7 +22,7 @@ session = Session()
 
 
 def peformance_monitor():
-    # 多进程session不能贡献
+    # 多进程session不能共享
     # 创建Session类实例
     p_session = Session()
 
