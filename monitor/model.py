@@ -8,6 +8,8 @@ from sqlalchemy import create_engine, Column, Integer, String, Enum, FLOAT
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import session, sessionmaker
 
+from monitor.util import getTime
+
 engine = create_engine('sqlite:///sqlite.db')
 Base = declarative_base()
 
@@ -43,6 +45,7 @@ br-0933f72140bd:       0       0    0    0    0     0          0         0      
 docker0: 1893566   34994    0    0    0     0          0         0 190006982   45068    0    0    0     0       0          0
 '''
 
+
 # json序列化与反序列化基类
 class JsonSerializer:
 
@@ -56,12 +59,13 @@ class JsonSerializer:
     def init_from_json(self, jsonData):
         if jsonData is not None:
             for name, value in vars(self).items():
-                if jsonData.get(name) is not None :
+                if jsonData.get(name) is not None:
                     setattr(self, name, jsonData.get(name))
         return self
 
+
 # cpu占用率, top命令数据
-class CpuUsage(Base,JsonSerializer):
+class CpuUsage(Base, JsonSerializer):
     __tablename__ = "cpu_usage"
     # 主键
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -80,7 +84,7 @@ class CpuUsage(Base,JsonSerializer):
 
 
 # 内存占用率, free命令数据
-class MemUsage(Base,JsonSerializer):
+class MemUsage(Base, JsonSerializer):
     __tablename__ = "mem_usage"
     # 主键
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -98,7 +102,7 @@ class MemUsage(Base,JsonSerializer):
 
 
 # 磁盘占用率, cat /proc/diskstats命令数据
-class DiskUsage(Base,JsonSerializer):
+class DiskUsage(Base, JsonSerializer):
     __tablename__ = "disk_usage"
     # 主键
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -121,7 +125,7 @@ class DiskUsage(Base,JsonSerializer):
 
 
 # 网络占用, free命令数据
-class NetUsage(Base,JsonSerializer):
+class NetUsage(Base, JsonSerializer):
     __tablename__ = "net_usage"
     # 主键
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -140,22 +144,31 @@ class NetUsage(Base,JsonSerializer):
         return "NetUsage:iface:{},bytes_sent:{},bytes_recv:{}".format(self.iface, self.bytes_sent, self.bytes_recv)
 
 
-if __name__ == '__main__':
-    Base.metadata.create_all(engine)
-    # 创建User类实例
-    memUsage = MemUsage(type='mem', total=1000, used=20, free=20, shared=30, buff_cache=40, available=50,
-                        time_stamp=11111111111)
-    Session = sessionmaker(bind=engine)
-    # 创建Session类实例
-    session = Session()
-    # 将该实例插入到users表
-    session.add(memUsage)
-    session.query(NetUsage).delete()
-
-    # # 一次插入多条记录形式
-    # session.add_all(
-    #     [User(name='wendy', fullname='Wendy Williams', password='foobar'),
-    #      User(name='mary', fullname='Mary Contrary', password='xxg527'),
-    #      User(name='fred', fullname='Fred Flinstone', password='blah')]
-    # )
-    session.commit()
+# if __name__ == '__main__':
+#     Base.metadata.create_all(engine)
+#     # 创建User类实例
+#     # memUsage = MemUsage(type='mem', total=1000, used=20, free=20, shared=30, buff_cache=40, available=50,
+#     #                     time_stamp=11111111111)
+#     Session = sessionmaker(bind=engine)
+#     # 创建Session类实例
+#     p_session = Session()
+#     # # 将该实例插入到users表
+#     # session.add(memUsage)
+#     # session.query(NetUsage).delete()
+#
+#     # # 一次插入多条记录形式
+#     # session.add_all(
+#     #     [User(name='wendy', fullname='Wendy Williams', password='foobar'),
+#     #      User(name='mary', fullname='Mary Contrary', password='xxg527'),
+#     #      User(name='fred', fullname='Fred Flinstone', password='blah')]
+#     # )
+#     # 过期秒数
+#     expire_second = 60 * 60
+#     current_time_stamp = getTime()
+#     # 过期时间戳
+#     expire_time_stamp = current_time_stamp - expire_second
+#     p_session.query(CpuUsage).filter(CpuUsage.time_stamp >= expire_time_stamp).delete(synchronize_session=False)
+#     p_session.query(MemUsage).filter(MemUsage.time_stamp >= expire_time_stamp).delete(synchronize_session=False)
+#     p_session.query(DiskUsage).filter(DiskUsage.time_stamp >= expire_time_stamp).delete(synchronize_session=False)
+#     p_session.query(NetUsage).filter(NetUsage.time_stamp >= expire_time_stamp).delete(synchronize_session=False)
+#     p_session.commit()

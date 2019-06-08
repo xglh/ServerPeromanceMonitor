@@ -102,12 +102,9 @@ def peformance_monitor():
     # 过期时间戳
     expire_time_stamp = current_time_stamp - expire_second
     p_session.query(CpuUsage).filter(CpuUsage.time_stamp >= expire_time_stamp).delete(synchronize_session=False)
-    p_session.commit()
-    p_session.query(MemUsage).filter(CpuUsage.time_stamp >= expire_time_stamp).delete(synchronize_session=False)
-    p_session.commit()
-    p_session.query(DiskUsage).filter(CpuUsage.time_stamp >= expire_time_stamp).delete(synchronize_session=False)
-    p_session.commit()
-    p_session.query(NetUsage).filter(CpuUsage.time_stamp >= expire_time_stamp).delete(synchronize_session=False)
+    p_session.query(MemUsage).filter(MemUsage.time_stamp >= expire_time_stamp).delete(synchronize_session=False)
+    p_session.query(DiskUsage).filter(MemUsage.time_stamp >= expire_time_stamp).delete(synchronize_session=False)
+    p_session.query(NetUsage).filter(MemUsage.time_stamp >= expire_time_stamp).delete(synchronize_session=False)
     p_session.commit()
 
 
