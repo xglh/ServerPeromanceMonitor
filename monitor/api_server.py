@@ -23,7 +23,6 @@ session = Session()
 
 def peformance_monitor():
     # 多进程session不能贡献
-    Session = sessionmaker(bind=engine)
     # 创建Session类实例
     session = Session()
 
