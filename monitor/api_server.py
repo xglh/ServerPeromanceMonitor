@@ -1,3 +1,4 @@
+# coding:utf-8
 import sys, os, json
 
 current_path = os.path.abspath(__file__)
